@@ -28,6 +28,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(classes = LocationApplication.class)
 public class AddressServiceTest {
 
+    private static final Long INVALID_STATE_OR_PROVINCE_ID = -10001L;
+    private static final Long INVALID_DISTRICT_ID = -10002L;
+    private static final Long INVALID_COUNTRY_ID = -10003L;
+
     @Autowired
     private AddressRepository addressRepository;
     @Autowired
@@ -149,11 +153,11 @@ public class AddressServiceTest {
         AddressPostVm addressPostVm = AddressPostVm.builder()
             .contactName("update-address")
             .districtId(district.getId())
-            .countryId(10000L)
+            .countryId(INVALID_COUNTRY_ID)
             .stateOrProvinceId(stateOrProvince.getId())
             .build();
         NotFoundException exception = assertThrows(NotFoundException.class, () -> addressService.createAddress(addressPostVm));
-        assertEquals(String.format("The country %s is not found", "10000"), exception.getMessage());
+        assertEquals(String.format("The country %s is not found", INVALID_COUNTRY_ID), exception.getMessage());
     }
 
     @Test
@@ -163,11 +167,12 @@ public class AddressServiceTest {
             .contactName("update-address")
             .districtId(district.getId())
             .countryId(country.getId())
-            .stateOrProvinceId(10000L)
+            .stateOrProvinceId(INVALID_STATE_OR_PROVINCE_ID)
             .build();
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> addressService.createAddress(addressPostVm));
-        assertEquals(String.format("The state or province %s is not found", "10000"), exception.getMessage());
+        assertEquals(String.format("The state or province %s is not found", INVALID_STATE_OR_PROVINCE_ID),
+            exception.getMessage());
     }
 
     @Test
@@ -175,13 +180,13 @@ public class AddressServiceTest {
         generateTestData();
         AddressPostVm addressPostVm = AddressPostVm.builder()
             .contactName("update-address")
-            .districtId(10000L)
+            .districtId(INVALID_DISTRICT_ID)
             .countryId(country.getId())
             .stateOrProvinceId(stateOrProvince.getId())
             .build();
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> addressService.createAddress(addressPostVm));
-        assertEquals(String.format("The district %s is not found", "10000"), exception.getMessage());
+        assertEquals(String.format("The district %s is not found", INVALID_DISTRICT_ID), exception.getMessage());
     }
 
     @Test
@@ -190,12 +195,12 @@ public class AddressServiceTest {
         AddressPostVm addressPostVm = AddressPostVm.builder()
             .contactName("update-address")
             .districtId(district.getId())
-            .countryId(10000L)
+            .countryId(INVALID_COUNTRY_ID)
             .stateOrProvinceId(stateOrProvince.getId())
             .build();
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> addressService.updateAddress(address1.getId(), addressPostVm));
-        assertEquals(String.format("The country %s is not found", "10000"), exception.getMessage());
+        assertEquals(String.format("The country %s is not found", INVALID_COUNTRY_ID), exception.getMessage());
     }
 
     @Test
@@ -205,11 +210,12 @@ public class AddressServiceTest {
             .contactName("update-address")
             .districtId(district.getId())
             .countryId(country.getId())
-            .stateOrProvinceId(10000L)
+            .stateOrProvinceId(INVALID_STATE_OR_PROVINCE_ID)
             .build();
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> addressService.updateAddress(address1.getId(), addressPostVm));
-        assertEquals(String.format("The state or province %s is not found", "10000"), exception.getMessage());
+        assertEquals(String.format("The state or province %s is not found", INVALID_STATE_OR_PROVINCE_ID),
+            exception.getMessage());
     }
 
     @Test
@@ -217,13 +223,13 @@ public class AddressServiceTest {
         generateTestData();
         AddressPostVm addressPostVm = AddressPostVm.builder()
             .contactName("update-address")
-            .districtId(10000L)
+            .districtId(INVALID_DISTRICT_ID)
             .countryId(country.getId())
             .stateOrProvinceId(stateOrProvince.getId())
             .build();
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> addressService.updateAddress(address1.getId(), addressPostVm));
-        assertEquals(String.format("The district %s is not found", "10000"), exception.getMessage());
+        assertEquals(String.format("The district %s is not found", INVALID_DISTRICT_ID), exception.getMessage());
     }
 
     @Test
