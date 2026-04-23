@@ -2,6 +2,8 @@ package com.yas.location.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
@@ -9,7 +11,9 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectWriter;
 import com.yas.location.service.AddressService;
+import com.yas.location.viewmodel.address.AddressDetailVm;
 import com.yas.location.viewmodel.address.AddressPostVm;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
+import static org.mockito.BDDMockito.given;
 
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -168,5 +173,35 @@ class AddressControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetAddressById_whenFound_thenReturnOk() throws Exception {
+        AddressDetailVm vm = AddressDetailVm.builder()
+            .id(1L)
+            .contactName("contactName")
+            .build();
+        given(addressService.getAddress(1L)).willReturn(vm);
+
+        this.mockMvc.perform(get("/storefront/addresses/1"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetAddressList_whenIdsProvided_thenReturnOk() throws Exception {
+        AddressDetailVm vm = AddressDetailVm.builder()
+            .id(1L)
+            .contactName("contactName")
+            .build();
+        given(addressService.getAddressList(List.of(1L, 2L))).willReturn(List.of(vm));
+
+        this.mockMvc.perform(get("/storefront/addresses").param("ids", "1", "2"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void testDeleteAddress_whenValidId_thenReturnOk() throws Exception {
+        this.mockMvc.perform(delete("/storefront/addresses/1"))
+            .andExpect(status().isOk());
     }
 }

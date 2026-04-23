@@ -1,6 +1,8 @@
 package com.yas.location.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,6 +15,9 @@ import com.yas.location.model.Country;
 import com.yas.location.service.CountryService;
 import com.yas.location.utils.Constants;
 import com.yas.location.viewmodel.country.CountryPostVm;
+import com.yas.location.viewmodel.country.CountryListGetVm;
+import com.yas.location.viewmodel.country.CountryVm;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -136,6 +141,43 @@ class CountryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testListCountries_thenReturnOk() throws Exception {
+        given(countryService.findAllCountries()).willReturn(
+            List.of(new CountryVm(1L, "VN", "Vietnam", null, true, true, true, true, true))
+        );
+
+        this.mockMvc.perform(get(Constants.ApiConstant.COUNTRIES_URL))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetCountry_whenFound_thenReturnOk() throws Exception {
+        given(countryService.findById(1L)).willReturn(
+            new CountryVm(1L, "VN", "Vietnam", null, true, true, true, true, true)
+        );
+
+        this.mockMvc.perform(get(Constants.ApiConstant.COUNTRIES_URL + "/1"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetPageableCountries_thenReturnOk() throws Exception {
+        CountryListGetVm listVm = new CountryListGetVm(List.of(), 0, 10, 0, 0, true);
+        given(countryService.getPageableCountries(0, 10)).willReturn(listVm);
+
+        this.mockMvc.perform(get(Constants.ApiConstant.COUNTRIES_URL + "/paging")
+                .param("pageNo", "0")
+                .param("pageSize", "10"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void testDeleteCountry_thenReturnNoContent() throws Exception {
+        this.mockMvc.perform(delete(Constants.ApiConstant.COUNTRIES_URL + "/1"))
+            .andExpect(status().isNoContent());
     }
 
 }
