@@ -233,8 +233,10 @@ public class AddressServiceTest {
     }
 
     @Test
-    void getAllAddresses_givenNullIds_thenThrowsRuntimeException() {
-        assertThrows(RuntimeException.class, () -> addressService.getAddressList(null));
+    void getAllAddresses_givenNullIds_thenReturnEmptyList() {
+        List<AddressDetailVm> addressDetailVmList = addressService.getAddressList(null);
+        assertNotNull(addressDetailVmList);
+        assertTrue(addressDetailVmList.isEmpty());
     }
 
     @Test
