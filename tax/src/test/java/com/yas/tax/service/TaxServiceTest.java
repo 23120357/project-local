@@ -3,7 +3,6 @@ package com.yas.tax.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,6 +65,7 @@ public class TaxServiceTest {
                 .countryId(1L)
                 .build();
 
+        // TaxRatePostVm(Double rate, String zipCode, Long taxClassId, Long stateOrProvinceId, Long countryId)
         taxRatePostVm = new TaxRatePostVm(10.0, "12345", 1L, 1L, 1L);
     }
 
@@ -164,13 +164,16 @@ public class TaxServiceTest {
         Page<TaxRate> page = new PageImpl<>(List.of(taxRate), PageRequest.of(0, 10), 1);
         when(taxRateRepository.findAll(any(Pageable.class))).thenReturn(page);
 
-        StateOrProvinceAndCountryGetNameVm locationVm = new StateOrProvinceAndCountryGetNameVm(1L, "California", 1L, "USA");
+        // StateOrProvinceAndCountryGetNameVm(Long stateOrProvinceId, String stateOrProvinceName, String countryName)
+        StateOrProvinceAndCountryGetNameVm locationVm =
+                new StateOrProvinceAndCountryGetNameVm(1L, "California", "USA");
         when(locationService.getStateOrProvinceAndCountryNames(any())).thenReturn(List.of(locationVm));
 
         TaxRateListGetVm result = taxRateService.getPageableTaxRates(0, 10);
 
-        assertThat(result.taxRateGetDetailVms()).hasSize(1);
-        assertThat(result.taxRateGetDetailVms().get(0).stateOrProvinceName()).isEqualTo("California");
+        // TaxRateListGetVm uses taxRateGetDetailContent()
+        assertThat(result.taxRateGetDetailContent()).hasSize(1);
+        assertThat(result.taxRateGetDetailContent().get(0).stateOrProvinceName()).isEqualTo("California");
         assertThat(result.totalElements()).isEqualTo(1);
     }
 

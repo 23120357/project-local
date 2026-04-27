@@ -14,11 +14,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yas.tax.model.TaxClass;
-import com.yas.tax.model.TaxRate;
 import com.yas.tax.service.TaxRateService;
 import com.yas.tax.viewmodel.taxrate.TaxRateListGetVm;
 import com.yas.tax.viewmodel.taxrate.TaxRatePostVm;
 import com.yas.tax.viewmodel.taxrate.TaxRateVm;
+import com.yas.tax.model.TaxRate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,14 +52,16 @@ public class TaxRateControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(taxRateController).build();
         objectMapper = new ObjectMapper();
 
-        taxRateVm = new TaxRateVm(1L, 10.0, "12345", "Standard");
+        // TaxRateVm(Long id, Double rate, String zipCode, Long taxClassId, Long stateOrProvinceId, Long countryId)
+        taxRateVm = new TaxRateVm(1L, 10.0, "12345", 1L, 1L, 1L);
+        // TaxRatePostVm(Double rate, String zipCode, Long taxClassId, Long stateOrProvinceId, Long countryId)
         taxRatePostVm = new TaxRatePostVm(10.0, "12345", 1L, 1L, 1L);
-        
+
         TaxClass taxClass = TaxClass.builder()
                 .id(1L)
                 .name("Standard")
                 .build();
-                
+
         taxRate = TaxRate.builder()
                 .id(1L)
                 .rate(10.0)

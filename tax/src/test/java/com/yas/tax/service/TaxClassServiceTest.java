@@ -45,7 +45,8 @@ public class TaxClassServiceTest {
                 .id(1L)
                 .name("Standard")
                 .build();
-        taxClassPostVm = new TaxClassPostVm("Standard");
+        // TaxClassPostVm(String id, String name)
+        taxClassPostVm = new TaxClassPostVm("1", "Standard");
     }
 
     @Test
@@ -140,6 +141,7 @@ public class TaxClassServiceTest {
 
         TaxClassListGetVm result = taxClassService.getPageableTaxClasses(0, 10);
 
+        // TaxClassListGetVm uses taxClassContent()
         assertThat(result.taxClassContent()).hasSize(1);
         assertThat(result.totalElements()).isEqualTo(1);
         assertThat(result.totalPages()).isEqualTo(1);

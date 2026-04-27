@@ -51,8 +51,10 @@ public class TaxClassControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(taxClassController).build();
         objectMapper = new ObjectMapper();
 
+        // TaxClassVm(Long id, String name)
         taxClassVm = new TaxClassVm(1L, "Standard");
-        taxClassPostVm = new TaxClassPostVm("Standard");
+        // TaxClassPostVm(String id, String name)
+        taxClassPostVm = new TaxClassPostVm("1", "Standard");
         taxClass = TaxClass.builder()
                 .id(1L)
                 .name("Standard")
@@ -61,6 +63,7 @@ public class TaxClassControllerTest {
 
     @Test
     void getPageableTaxClasses_ShouldReturnOk() throws Exception {
+        // TaxClassListGetVm uses taxClassContent()
         TaxClassListGetVm listGetVm = new TaxClassListGetVm(List.of(taxClassVm), 0, 10, 1, 1, true);
         when(taxClassService.getPageableTaxClasses(anyInt(), anyInt())).thenReturn(listGetVm);
 

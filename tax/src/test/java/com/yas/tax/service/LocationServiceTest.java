@@ -2,7 +2,6 @@ package com.yas.tax.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -52,7 +51,7 @@ public class LocationServiceTest {
 
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        
+
         when(authentication.getPrincipal()).thenReturn(jwt);
         when(jwt.getTokenValue()).thenReturn("mock-token");
     }
@@ -60,18 +59,20 @@ public class LocationServiceTest {
     @Test
     void getStateOrProvinceAndCountryNames_ShouldReturnList() {
         when(serviceUrlConfig.location()).thenReturn("http://localhost:8080");
-        
+
         when(restClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(any(URI.class))).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.headers(any())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
 
+        // StateOrProvinceAndCountryGetNameVm(Long stateOrProvinceId, String stateOrProvinceName, String countryName)
         List<StateOrProvinceAndCountryGetNameVm> expectedResponse = List.of(
-            new StateOrProvinceAndCountryGetNameVm(1L, "California", 1L, "USA")
+            new StateOrProvinceAndCountryGetNameVm(1L, "California", "USA")
         );
         when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(expectedResponse);
 
-        List<StateOrProvinceAndCountryGetNameVm> result = locationService.getStateOrProvinceAndCountryNames(List.of(1L));
+        List<StateOrProvinceAndCountryGetNameVm> result =
+                locationService.getStateOrProvinceAndCountryNames(List.of(1L));
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).stateOrProvinceName()).isEqualTo("California");
