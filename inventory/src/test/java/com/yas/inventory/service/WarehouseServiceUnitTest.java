@@ -81,8 +81,8 @@ class WarehouseServiceUnitTest {
         List<ProductInfoVm> result = warehouseService.getProductWarehouse(7L, "P", "SKU", FilterExistInWhSelection.YES);
 
         assertEquals(2, result.size());
-        assertEquals(true, result.get(0).isInStock());
-        assertEquals(false, result.get(1).isInStock());
+        assertEquals(true, result.get(0).existInWh());
+        assertEquals(false, result.get(1).existInWh());
     }
 
     @Test
