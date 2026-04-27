@@ -8,32 +8,41 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class SecurityConfigTest {
 
     private final SecurityConfig securityConfig = new SecurityConfig();
 
     @Test
-    void jwtAuthenticationConverterForKeycloak_ShouldMapRolesToGrantedAuthorities() {
+    void jwtAuthenticationConverterForKeycloak_ShouldReturnNonNull() {
         JwtAuthenticationConverter converter = securityConfig.jwtAuthenticationConverterForKeycloak();
         assertThat(converter).isNotNull();
+    }
 
-        // Verify the converter maps JWT roles to ROLE_ prefixed authorities
+    @SuppressWarnings("unchecked")
+    @Test
+    void jwtAuthenticationConverterForKeycloak_ShouldMapRolesToGrantedAuthorities() {
+        JwtAuthenticationConverter jwtAuthenticationConverter =
+                securityConfig.jwtAuthenticationConverterForKeycloak();
+
+        // Use reflection to access the internal jwtGrantedAuthoritiesConverter field
+        Converter<Jwt, Collection<GrantedAuthority>> grantedAuthoritiesConverter =
+                (Converter<Jwt, Collection<GrantedAuthority>>)
+                        ReflectionTestUtils.getField(
+                                jwtAuthenticationConverter, "jwtGrantedAuthoritiesConverter");
+
+        assertThat(grantedAuthoritiesConverter).isNotNull();
+
         Jwt jwt = mock(Jwt.class);
         Map<String, Collection<String>> realmAccess = Map.of("roles", List.of("ADMIN", "USER"));
         when(jwt.getClaim("realm_access")).thenReturn(realmAccess);
-        // Additional token claims required by JwtAuthenticationConverter
-        when(jwt.getSubject()).thenReturn("test-subject");
-        when(jwt.getClaims()).thenReturn(Map.of("realm_access", realmAccess, "sub", "test-subject"));
-        when(jwt.getTokenValue()).thenReturn("mock-token");
 
-        // Extract the grantedAuthoritiesConverter from the JwtAuthenticationConverter
-        // by calling it via the actual converter's internal converter field
-        Collection<GrantedAuthority> authorities = converter
-                .getJwtGrantedAuthoritiesConverter().convert(jwt);
+        Collection<GrantedAuthority> authorities = grantedAuthoritiesConverter.convert(jwt);
 
         assertThat(authorities).isNotNull();
         assertThat(authorities).hasSize(2);
