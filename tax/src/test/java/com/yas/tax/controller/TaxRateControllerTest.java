@@ -2,7 +2,6 @@ package com.yas.tax.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,23 +22,26 @@ import com.yas.tax.viewmodel.taxrate.TaxRateVm;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest(controllers = TaxRateController.class)
+@ExtendWith(MockitoExtension.class)
 public class TaxRateControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @Mock
     private TaxRateService taxRateService;
+
+    @InjectMocks
+    private TaxRateController taxRateController;
 
     private TaxRateVm taxRateVm;
     private TaxRatePostVm taxRatePostVm;
@@ -47,6 +49,9 @@ public class TaxRateControllerTest {
 
     @BeforeEach
     void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(taxRateController).build();
+        objectMapper = new ObjectMapper();
+
         taxRateVm = new TaxRateVm(1L, 10.0, "12345", "Standard");
         taxRatePostVm = new TaxRatePostVm(10.0, "12345", 1L, 1L, 1L);
         

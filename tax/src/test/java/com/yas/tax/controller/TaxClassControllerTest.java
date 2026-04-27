@@ -21,23 +21,26 @@ import com.yas.tax.viewmodel.taxclass.TaxClassVm;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest(controllers = TaxClassController.class)
+@ExtendWith(MockitoExtension.class)
 public class TaxClassControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @Mock
     private TaxClassService taxClassService;
+
+    @InjectMocks
+    private TaxClassController taxClassController;
 
     private TaxClassVm taxClassVm;
     private TaxClassPostVm taxClassPostVm;
@@ -45,6 +48,9 @@ public class TaxClassControllerTest {
 
     @BeforeEach
     void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(taxClassController).build();
+        objectMapper = new ObjectMapper();
+
         taxClassVm = new TaxClassVm(1L, "Standard");
         taxClassPostVm = new TaxClassPostVm("Standard");
         taxClass = TaxClass.builder()
