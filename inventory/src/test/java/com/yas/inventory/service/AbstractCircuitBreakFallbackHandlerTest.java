@@ -1,6 +1,5 @@
 package com.yas.inventory.service;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -29,10 +28,8 @@ class AbstractCircuitBreakFallbackHandlerTest {
     }
 
     @Test
-    void handleTypedFallback_whenThrowableIsNull_shouldReturnNull() throws Throwable {
-        String result = fallbackHandler.callTyped(null);
-
-        assertNull(result);
+    void handleTypedFallback_whenThrowableIsNull_shouldThrowNullPointerException() {
+        assertThrows(NullPointerException.class, () -> fallbackHandler.callTyped(null));
     }
 
     private static final class TestFallbackHandler extends AbstractCircuitBreakFallbackHandler {
