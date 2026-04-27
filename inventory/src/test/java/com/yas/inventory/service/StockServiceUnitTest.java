@@ -64,7 +64,7 @@ class StockServiceUnitTest {
     @Test
     void addProductIntoWarehouse_whenValidInput_shouldSaveStocks() {
         Warehouse warehouse = Warehouse.builder().id(7L).name("WH-A").addressId(10L).build();
-        List<StockPostVm> postVms = List.of(new StockPostVm(7L, 11L), new StockPostVm(7L, 12L));
+        List<StockPostVm> postVms = List.of(new StockPostVm(11L, 7L), new StockPostVm(12L, 7L));
 
         when(stockRepository.existsByWarehouseIdAndProductId(7L, 11L)).thenReturn(false);
         when(stockRepository.existsByWarehouseIdAndProductId(7L, 12L)).thenReturn(false);
@@ -90,7 +90,7 @@ class StockServiceUnitTest {
 
         assertThrows(
             StockExistingException.class,
-            () -> stockService.addProductIntoWarehouse(List.of(new StockPostVm(7L, 11L)))
+            () -> stockService.addProductIntoWarehouse(List.of(new StockPostVm(11L, 7L)))
         );
 
         verify(stockRepository, never()).saveAll(any());
@@ -103,7 +103,7 @@ class StockServiceUnitTest {
 
         assertThrows(
             NotFoundException.class,
-            () -> stockService.addProductIntoWarehouse(List.of(new StockPostVm(7L, 11L)))
+            () -> stockService.addProductIntoWarehouse(List.of(new StockPostVm(11L, 7L)))
         );
 
         verify(stockRepository, never()).saveAll(any());
