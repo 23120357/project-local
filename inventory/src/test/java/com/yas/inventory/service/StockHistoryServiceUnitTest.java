@@ -56,6 +56,20 @@ class StockHistoryServiceUnitTest {
     }
 
     @Test
+    void createStockHistories_whenNoRequestMatched_shouldSaveEmptyList() {
+        Warehouse warehouse = Warehouse.builder().id(1L).name("W1").addressId(10L).build();
+        Stock stock = Stock.builder().id(100L).productId(10L).warehouse(warehouse).quantity(1L).build();
+
+        List<StockQuantityVm> requests = List.of(new StockQuantityVm(999L, 1L, "none"));
+
+        stockHistoryService.createStockHistories(List.of(stock), requests);
+
+        ArgumentCaptor<List<StockHistory>> captor = ArgumentCaptor.forClass(List.class);
+        verify(stockHistoryRepository).saveAll(captor.capture());
+        assertEquals(0, captor.getValue().size());
+    }
+
+    @Test
     void getStockHistories_shouldMapWithProductName() {
         StockHistory history = StockHistory.builder()
             .id(11L)

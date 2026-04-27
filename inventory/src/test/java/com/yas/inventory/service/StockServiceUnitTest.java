@@ -1,7 +1,6 @@
 package com.yas.inventory.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -146,6 +145,17 @@ class StockServiceUnitTest {
         assertEquals("P1", result.getFirst().productName());
         assertEquals("SKU1", result.getFirst().productSku());
         assertEquals(9L, result.getFirst().warehouseId());
+    }
+
+    @Test
+    void getStocksByWarehouseIdAndProductNameAndSku_whenNoProducts_shouldReturnEmptyList() {
+        when(warehouseService.getProductWarehouse(9L, "P", "SKU", FilterExistInWhSelection.YES))
+            .thenReturn(List.of());
+        when(stockRepository.findByWarehouseIdAndProductIdIn(9L, List.of())).thenReturn(List.of());
+
+        List<StockVm> result = stockService.getStocksByWarehouseIdAndProductNameAndSku(9L, "P", "SKU");
+
+        assertEquals(0, result.size());
     }
 
     @Test
