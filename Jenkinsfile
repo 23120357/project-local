@@ -28,9 +28,9 @@ def getChangedServices() {
     // Priority: git diff vs main — catches brand-new branches too
     def gitDiffOutput = ''
     try {
-        sh(script: 'git fetch origin location --no-tags --depth=1', returnStdout: false)
+        sh(script: 'git fetch origin main --no-tags --depth=1', returnStdout: false)
         gitDiffOutput = sh(
-            script: 'git diff --name-only origin/location...HEAD',
+            script: 'git diff --name-only origin/main...HEAD',
             returnStdout: true
         ).trim()
     } catch (e) {
