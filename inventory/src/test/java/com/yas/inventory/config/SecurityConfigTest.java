@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 
 class SecurityConfigTest {
@@ -22,7 +23,7 @@ class SecurityConfigTest {
     void filterChain_shouldBuildSuccessfully() throws Exception {
         SecurityConfig config = new SecurityConfig();
         HttpSecurity http = mock(HttpSecurity.class);
-        SecurityFilterChain chain = mock(SecurityFilterChain.class);
+        DefaultSecurityFilterChain chain = mock(DefaultSecurityFilterChain.class);
 
         when(http.authorizeHttpRequests(any())).thenReturn(http);
         when(http.oauth2ResourceServer(any())).thenReturn(http);
