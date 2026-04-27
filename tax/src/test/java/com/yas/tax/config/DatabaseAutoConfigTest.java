@@ -7,14 +7,21 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+@SpringBootTest(classes = DatabaseAutoConfig.class)
+@ExtendWith(SpringExtension.class)
 public class DatabaseAutoConfigTest {
 
-    private final DatabaseAutoConfig databaseAutoConfig = new DatabaseAutoConfig();
+    @Autowired
+    private AuditorAware<String> auditorAware;
 
     @AfterEach
     void tearDown() {
@@ -27,7 +34,6 @@ public class DatabaseAutoConfigTest {
         when(securityContext.getAuthentication()).thenReturn(null);
         SecurityContextHolder.setContext(securityContext);
 
-        AuditorAware<String> auditorAware = databaseAutoConfig.auditorAware();
         Optional<String> result = auditorAware.getCurrentAuditor();
 
         assertThat(result).isPresent();
@@ -42,7 +48,6 @@ public class DatabaseAutoConfigTest {
         when(authentication.getName()).thenReturn("testuser");
         SecurityContextHolder.setContext(securityContext);
 
-        AuditorAware<String> auditorAware = databaseAutoConfig.auditorAware();
         Optional<String> result = auditorAware.getCurrentAuditor();
 
         assertThat(result).isPresent();

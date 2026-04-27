@@ -8,29 +8,35 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClient;
 
+@SpringBootTest(classes = {SecurityConfig.class, RestClientConfig.class})
+@ExtendWith(SpringExtension.class)
 public class SecurityConfigTest {
 
-    private final SecurityConfig securityConfig = new SecurityConfig();
+    @Autowired
+    private JwtAuthenticationConverter jwtAuthenticationConverter;
+
+    @Autowired
+    private RestClient restClient;
 
     @Test
-    void jwtAuthenticationConverterForKeycloak_ShouldReturnNonNull() {
-        JwtAuthenticationConverter converter = securityConfig.jwtAuthenticationConverterForKeycloak();
-        assertThat(converter).isNotNull();
+    void jwtAuthenticationConverter_ShouldBeNotNull() {
+        assertThat(jwtAuthenticationConverter).isNotNull();
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    void jwtAuthenticationConverterForKeycloak_ShouldMapRolesToGrantedAuthorities() {
-        JwtAuthenticationConverter jwtAuthenticationConverter =
-                securityConfig.jwtAuthenticationConverterForKeycloak();
-
-        // Use reflection to access the internal jwtGrantedAuthoritiesConverter field
+    void jwtAuthenticationConverter_ShouldMapRolesToGrantedAuthorities() {
         Converter<Jwt, Collection<GrantedAuthority>> grantedAuthoritiesConverter =
                 (Converter<Jwt, Collection<GrantedAuthority>>)
                         ReflectionTestUtils.getField(
@@ -52,8 +58,7 @@ public class SecurityConfigTest {
     }
 
     @Test
-    void restClientConfig_ShouldReturnNonNullBean() {
-        RestClientConfig restClientConfig = new RestClientConfig();
-        assertThat(restClientConfig.restClient()).isNotNull();
+    void restClient_ShouldBeNotNull() {
+        assertThat(restClient).isNotNull();
     }
 }
