@@ -193,6 +193,25 @@ class WarehouseServiceUnitTest {
     }
 
     @Test
+    void update_whenWarehouseNotFound_shouldThrow() {
+        WarehousePostVm postVm = WarehousePostVm.builder().name("new").build();
+        when(warehouseRepository.findById(5L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> warehouseService.update(postVm, 5L));
+    }
+
+    @Test
+    void update_whenNameDuplicated_shouldThrow() {
+        Warehouse warehouse = Warehouse.builder().id(5L).name("old").addressId(66L).build();
+        WarehousePostVm postVm = WarehousePostVm.builder().name("new").build();
+
+        when(warehouseRepository.findById(5L)).thenReturn(Optional.of(warehouse));
+        when(warehouseRepository.existsByNameWithDifferentId("new", 5L)).thenReturn(true);
+
+        assertThrows(DuplicatedException.class, () -> warehouseService.update(postVm, 5L));
+    }
+
+    @Test
     void delete_whenWarehouseFound_shouldDeleteWarehouseAndAddress() {
         Warehouse warehouse = Warehouse.builder().id(5L).name("W5").addressId(66L).build();
         when(warehouseRepository.findById(5L)).thenReturn(Optional.of(warehouse));
@@ -201,6 +220,13 @@ class WarehouseServiceUnitTest {
 
         verify(warehouseRepository).deleteById(5L);
         verify(locationService).deleteAddress(66L);
+    }
+
+    @Test
+    void delete_whenWarehouseNotFound_shouldThrow() {
+        when(warehouseRepository.findById(5L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> warehouseService.delete(5L));
     }
 
     @Test

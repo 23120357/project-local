@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -135,5 +137,59 @@ class ProductServiceTest {
         when(requestBodyUriSpec.body(productQuantityPostVms)).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
         assertDoesNotThrow(() -> productService.updateProductQuantity(productQuantityPostVms));
+    }
+
+    @Test
+    void testFilterProducts_whenProductIdsEmpty_returnListProductInfoVm() {
+        String productName = "ProductName";
+        String productSku = "ProductSKU";
+        List<Long> productIds = List.of();
+        FilterExistInWhSelection selection = FilterExistInWhSelection.NO;
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("name", productName);
+        params.add("sku", productSku);
+        params.add("selection", selection.name());
+
+        final URI url = UriComponentsBuilder
+            .fromUriString(PRODUCT_URL)
+            .path("/backoffice/products/for-warehouse")
+            .queryParams(params)
+            .build()
+            .toUri();
+
+        RestClient.RequestHeadersUriSpec requestHeadersUriSpec = Mockito.mock(RestClient.RequestHeadersUriSpec.class);
+        when(restClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(url)).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.headers(any())).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec);
+        ResponseEntity responseEntity = mock(ResponseEntity.class);
+        ProductInfoVm productInfoVm = new ProductInfoVm(1L, productName, productSku, false);
+        when(responseSpec.toEntity(new ParameterizedTypeReference<List<ProductInfoVm>>() {}))
+            .thenReturn(responseEntity);
+        when(responseEntity.getBody()).thenReturn(List.of(productInfoVm));
+
+        List<ProductInfoVm> result = productService.filterProducts(productName, productSku, productIds, selection);
+
+        assertEquals(1, result.size());
+        assertEquals(productSku, result.getFirst().sku());
+    }
+
+    @Test
+    void handleProductInfoFallback_shouldRethrowThrowable() {
+        Throwable throwable = new RuntimeException("fallback-error");
+
+        Throwable thrown = assertThrows(Throwable.class, () -> productService.handleProductInfoFallback(throwable));
+
+        assertSame(throwable, thrown);
+    }
+
+    @Test
+    void handleProductInfoListFallback_shouldRethrowThrowable() {
+        Throwable throwable = new RuntimeException("fallback-list-error");
+
+        Throwable thrown = assertThrows(Throwable.class, () -> productService.handleProductInfoListFallback(throwable));
+
+        assertSame(throwable, thrown);
     }
 }

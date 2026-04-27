@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.yas.commonlibrary.exception.NotFoundException;
 import com.yas.commonlibrary.exception.StockExistingException;
+import com.yas.commonlibrary.exception.BadRequestException;
 import com.yas.inventory.model.Stock;
 import com.yas.inventory.model.Warehouse;
 import com.yas.inventory.model.enumeration.FilterExistInWhSelection;
@@ -110,6 +111,20 @@ class StockServiceUnitTest {
     }
 
     @Test
+    void addProductIntoWarehouse_whenWarehouseNotFound_shouldThrow() {
+        when(stockRepository.existsByWarehouseIdAndProductId(7L, 11L)).thenReturn(false);
+        when(productService.getProduct(11L)).thenReturn(new ProductInfoVm(11L, "P1", "SKU1", true));
+        when(warehouseRepository.findById(7L)).thenReturn(Optional.empty());
+
+        assertThrows(
+            NotFoundException.class,
+            () -> stockService.addProductIntoWarehouse(List.of(new StockPostVm(11L, 7L)))
+        );
+
+        verify(stockRepository, never()).saveAll(any());
+    }
+
+    @Test
     void getStocksByWarehouseIdAndProductNameAndSku_whenValidInput_shouldMapResult() {
         ProductInfoVm p1 = new ProductInfoVm(11L, "P1", "SKU1", true);
         Warehouse warehouse = Warehouse.builder().id(9L).name("W9").addressId(1L).build();
@@ -183,5 +198,47 @@ class StockServiceUnitTest {
         verify(stockRepository).saveAll(List.of());
         verify(stockHistoryService).createStockHistories(List.of(), requestItems);
         verify(productService, never()).updateProductQuantity(any());
+    }
+
+    @Test
+    void updateProductQuantityInStock_whenRequestDoesNotMatchAnyStock_shouldSkipAdjustment() {
+        Warehouse warehouse = Warehouse.builder().id(9L).name("W9").addressId(1L).build();
+        Stock stock = Stock.builder()
+            .id(200L)
+            .productId(99L)
+            .quantity(10L)
+            .reservedQuantity(0L)
+            .warehouse(warehouse)
+            .build();
+        List<StockQuantityVm> requestItems = List.of(new StockQuantityVm(201L, 3L, "no match"));
+        StockQuantityUpdateVm request = new StockQuantityUpdateVm(requestItems);
+
+        when(stockRepository.findAllById(List.of(201L))).thenReturn(List.of(stock));
+
+        stockService.updateProductQuantityInStock(request);
+
+        assertEquals(10L, stock.getQuantity());
+        verify(stockRepository).saveAll(List.of(stock));
+    }
+
+    @Test
+    void updateProductQuantityInStock_whenAdjustedQuantityInvalid_shouldThrow() {
+        Warehouse warehouse = Warehouse.builder().id(9L).name("W9").addressId(1L).build();
+        Stock stock = Stock.builder()
+            .id(100L)
+            .productId(11L)
+            .quantity(-5L)
+            .reservedQuantity(0L)
+            .warehouse(warehouse)
+            .build();
+
+        List<StockQuantityVm> requestItems = List.of(new StockQuantityVm(100L, -1L, "invalid"));
+        StockQuantityUpdateVm request = new StockQuantityUpdateVm(requestItems);
+
+        when(stockRepository.findAllById(List.of(100L))).thenReturn(List.of(stock));
+
+        assertThrows(BadRequestException.class, () -> stockService.updateProductQuantityInStock(request));
+        verify(stockRepository, never()).saveAll(any());
+        verify(stockHistoryService, never()).createStockHistories(any(), any());
     }
 }

@@ -4,6 +4,8 @@ import static com.yas.inventory.util.SecurityContextUtils.setUpSecurityContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,6 +14,8 @@ import com.yas.inventory.config.ServiceUrlConfig;
 import com.yas.inventory.viewmodel.address.AddressDetailVm;
 import com.yas.inventory.viewmodel.address.AddressPostVm;
 import com.yas.inventory.viewmodel.address.AddressVm;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -173,6 +177,28 @@ class LocationServiceTest {
         when(requestHeadersUriSpec.retrieve()).thenReturn(responseSpec);
 
         assertDoesNotThrow(() -> locationService.deleteAddress(addressId));
+    }
+
+    @Test
+    void handleAddressDetailFallback_shouldRethrowThrowable() throws Exception {
+        Method method = LocationService.class.getDeclaredMethod("handleAddressDetailFallback", Throwable.class);
+        method.setAccessible(true);
+        RuntimeException throwable = new RuntimeException("address-detail-fallback");
+
+        InvocationTargetException ex = assertThrows(InvocationTargetException.class, () -> method.invoke(locationService, throwable));
+
+        assertSame(throwable, ex.getCause());
+    }
+
+    @Test
+    void handleAddressFallback_shouldRethrowThrowable() throws Exception {
+        Method method = LocationService.class.getDeclaredMethod("handleAddressFallback", Throwable.class);
+        method.setAccessible(true);
+        RuntimeException throwable = new RuntimeException("address-fallback");
+
+        InvocationTargetException ex = assertThrows(InvocationTargetException.class, () -> method.invoke(locationService, throwable));
+
+        assertSame(throwable, ex.getCause());
     }
 
 }
