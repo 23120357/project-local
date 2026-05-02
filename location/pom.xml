@@ -16,7 +16,6 @@
         <sonar.organization>nashtech-garage</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.projectKey>nashtech-garage_yas-location</sonar.projectKey>
-        <revision>1.0-SNAPSHOT</revision>
     </properties>
     <dependencies>
         <dependency>
@@ -83,7 +82,7 @@
                 <executions>
                     <execution>
                         <id>jacoco-check</id>
-                        <phase>verify</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
@@ -107,5 +106,4 @@
         </plugins>
     </build>
 </project>
-
 
