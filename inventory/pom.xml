@@ -82,7 +82,7 @@
                 <executions>
                     <execution>
                         <id>jacoco-check</id>
-                        <phase>verify</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
