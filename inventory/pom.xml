@@ -8,14 +8,15 @@
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>inventory</artifactId>
+    <artifactId>location</artifactId>
     <version>${revision}</version>
-    <name>inventory</name>
-    <description>YAS Inventory Service</description>
+    <name>location</name>
+    <description>YAS Location Service</description>
     <properties>
         <sonar.organization>nashtech-garage</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.projectKey>nashtech-garage_yas-inventory</sonar.projectKey>
+        <sonar.projectKey>nashtech-garage_yas-location</sonar.projectKey>
+        <revision>1.0-SNAPSHOT</revision>
     </properties>
     <dependencies>
         <dependency>
@@ -79,6 +80,29 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
