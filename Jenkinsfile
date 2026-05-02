@@ -78,6 +78,41 @@ pipeline {
             }
         }
 
+        stage('Security Scan: Gitleaks') {
+            steps {
+                script {
+                    echo '=> Bắt đầu tải và chạy Gitleaks...'
+                    sh '''
+                                        set -e
+                                        GITLEAKS_URL="https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz"
+
+                                        if command -v gitleaks >/dev/null 2>&1; then
+                                            echo "Sử dụng gitleaks có sẵn trên agent"
+                                            gitleaks detect --source . -v --redact --config gitleaks.toml --no-git --report-path=gitleaks-report.json
+                                            exit 0
+                                        fi
+
+                                        if command -v wget >/dev/null 2>&1; then
+                                            wget -qO- "$GITLEAKS_URL" | tar xvz
+                                        elif command -v curl >/dev/null 2>&1; then
+                                            curl -sSL "$GITLEAKS_URL" | tar xvz
+                                        else
+                                            echo "ERROR: Agent không có wget/curl để tải Gitleaks." >&2
+                                            exit 2
+                                        fi
+
+                                        chmod +x gitleaks
+                                        ./gitleaks detect --source . -v --redact --config gitleaks.toml --no-git --report-path=gitleaks-report.json
+                    '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'gitleaks-report.json', allowEmptyArchive: true
+                }
+            }
+        }
+
         stage('Test & Coverage') {
             steps {
                 echo 'Đang kiểm tra phiên bản Java...'
@@ -91,7 +126,12 @@ pipeline {
                     } else {
                         def serviceSelector = services.join(',')
                         echo "Đang chạy Unit Test và tạo report Coverage cho CÁC SERVICE BỊ THAY ĐỔI: ${services}"
-                        sh "mvn clean test jacoco:report -pl ${serviceSelector} -am '-Dsurefire.excludes=**/*IT.java,**/*IT\$*.java,**/ProductCdcConsumerTest.java,**/ProductVectorRepositoryTest.java,**/VectorQueryTest.java'"
+                        sh "mvn -pl ${serviceSelector} -am clean"
+                        for (String svc : services) {
+                            stage("Test: ${svc}") {
+                                sh "mvn test jacoco:report -pl ${svc} -am '-Dsurefire.excludes=**/*IT.java,**/*IT\$*.java,**/ProductCdcConsumerTest.java,**/ProductVectorRepositoryTest.java,**/VectorQueryTest.java'"
+                            }
+                        }
                     }
                 }
             }
